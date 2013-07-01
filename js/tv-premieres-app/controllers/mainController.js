@@ -9,6 +9,11 @@ app.controller("mainController", function($scope, $http){
     $scope.orderDirections = ["Descending", "Ascending"];
     $scope.orderField = "Air Date"; //Default order field
     $scope.orderReverse = false;
+    $scope.currentPage = 0;
+    $scope.pageSize = 5;
+    $scope.numberOfPages=function(){
+        return Math.ceil($scope.results.length/$scope.pageSize);
+    }
     $scope.setGenreFilter = function(genre) {
         $scope.genreFilter = genre;
     };
@@ -44,7 +49,7 @@ app.controller("mainController", function($scope, $http){
                     });
                 });
             });
-            console.log($scope.results);
+            //console.log($scope.results);
         }).error(function(error) {
 
             });
@@ -78,4 +83,10 @@ app.filter('isGenre', function() {
             return out;
         }
     };
+});
+app.filter('startFrom', function() {
+    return function(input, start) {
+        start = +start; //parse to int
+        return input.slice(start);
+    }
 });
