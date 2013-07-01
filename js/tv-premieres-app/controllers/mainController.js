@@ -1,4 +1,4 @@
-app.controller("mainController", function($scope, $http){
+app.controller("mainController", function($scope, $http, $timeout){
 
     $scope.apiKey = "e0d8acfbf85add7d64054743fd395216";
     $scope.results =[];
@@ -14,6 +14,14 @@ app.controller("mainController", function($scope, $http){
     $scope.numberOfPages=function(){
         return Math.ceil($scope.results.length/$scope.pageSize);
     }
+    $scope.filter = function() {
+        $timeout(function() { //wait for 'filtered' to be changed
+            /* change pagination with $scope.filtered */
+            console.log($scope.filtered);
+            $scope.numberOfPages = Math.ceil($scope.filtered.length/$scope.entryLimit);
+        }, 10);
+    };
+
     $scope.setGenreFilter = function(genre) {
         $scope.genreFilter = genre;
     };
