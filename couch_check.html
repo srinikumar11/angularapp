@@ -1,0 +1,17 @@
+<html>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+
+    $.ajax({
+        url: '/couchdb/_all_dbs',
+        success: function(response){
+            console.log(response);
+        }
+    });
+
+</script>
+<head><title>Test Access to CouchDB</title></head>
+<body>
+</body>
+</html>
