@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+he easiest way I found to solve it is by using locally installed Apache Web Server with enabled mod_proxy module and configured ProxyPass directive.
+
+Let start with basic setup
+
+I have Apache Web Server installed on http://127.0.0.1:8181, not configured yet
+I have CouchDB installed on http://127.0.0.1:5984/
+I have index.html deployd on Apache on: http://localhost:8181/couchdb.html.
+index.html has the following content
+
+<html>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+    var http = XMLHttpRequest();
+    http.open('GET', 'http://127.0.0.1:5984/_all_dbs', true); // ! WE WILL CHANGE THIS LINE
+    http.onreadystatechange = function() {
+        if (http.readyState == 4 && http.status == 200) {
+            console.debug('it works');
+        }
+    };
+    http.send(null)
+</script>
+<head><title>Test Access to CouchDB</title></head>
+<body>
+</body>
+</html>
+If you try it just now it will not work because of the cross domain problem (in this instance ports don't match 8181 != 5984).
+
+How to fix it
+
+configure Apache (apache_home/conf/httpd.conf)
+uncomment LoadModule proxy_module modules/mod_proxy.so
+uncomment LoadModule proxy_http_module modules/mod_proxy_http.so
+add ProxyPass /couchdb http://127.0.0.1:5984 (as top level property like ServerAdmin)
+restart Apache
+modify index.html
+replace http.open('GET', 'http://127.0.0.1:5984/_all_dbs', true); with http.open('GET', '/couchdb/_all_dbs', true);
+Try now and you should see 'it works' output in the javascript console (I used Firebug Console)
+</body>
+</html>
