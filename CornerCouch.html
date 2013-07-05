@@ -6,6 +6,10 @@
     <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
 </head>
 <body style="padding-top: 10px">
+http://barkingiguana.com/2009/01/20/adding-a-simple-view-to-couchdb/
+http://barkingiguana.com/2009/01/20/adding-a-simple-view-to-couchdb/
+http://eddelplus.iriscouch.com/gbook1/_design/app
+{"_id":"_design/app","_rev":"29-d2b2cd0925bcf32be6d5d1b2076c5ed6","views":{"utc_only":{"map":"function(doc) { if(doc.utc) emit(doc.utc, null) }"}},"_attachments":{"angular-cornercouch.js":{"content_type":"application/x-javascript","revpos":29,"digest":"md5-FAMyP+4fstsRW3Jc03xxdA==","length":10845,"stub":true},"guestbook.html":{"content_type":"text/html","revpos":28,"digest":"md5-t3DhN8riG3PqovhvFX8vug==","length":7531,"stub":true}}}
 <div class="container" ng-controller="ctrlGBook1">
     <h2>AngularJS/CouchDB + CornerCouch Guestbook</h2>
     <h4>Login form (try testuser/secret and get lots of information)</h4>
@@ -90,11 +94,11 @@
 
     function ctrlGBook1($scope, $filter, cornercouch) {
 
-        $scope.server = cornercouch();
+        $scope.server = cornercouch('couchdb');
         $scope.server.session();
         $scope.gbookdb = $scope.server.getDB('angular');
         $scope.newentry = $scope.gbookdb.newDoc();
-        //$scope.gbookdb.query("app", "utc_only", { include_docs: true, descending: true, limit: 8 });
+        $scope.gbookdb.query("app", "utc_only", { include_docs: true, descending: true, limit: 8 });
 
         $scope.submitLogin = function() {
             $scope.server.login($scope.loginUser, $scope.loginPass)
@@ -167,10 +171,24 @@
                 delete $scope.errordata;
                 $scope.detail = $scope.newentry;
                 $scope.newentry = $scope.gbookdb.newDoc();
-                $scope.gbookdb.query("app", "utc_only", { include_docs: true, descending: true, limit: 8 });
+                $scope.gbookdb.query({ include_docs: true, descending: true, limit: 8 });
             });
         };
     }
+//    angular.module('CouchApp', ['CornerCouch']);
+
+//    function ctrlGBook1($scope, cornercouch) {
+//
+//        $scope.server = cornercouch("http://localhost");
+//        $scope.gbookdb = $scope.server.getDB("gbook1");
+//        $scope.gbookdb.query("");
+//        $scope.detail = $scope.gbookdb.newDoc();
+//
+//        $scope.rowClick = function(idx) { $scope.detail = $scope.gbookdb.getQueryDoc(idx); }
+//
+//        $scope.nextClick = function() { $scope.gbookdb.queryNext(); delete $scope.detail }
+//        $scope.prevClick = function() { $scope.gbookdb.queryPrev(); delete $scope.detail }
+//    }
 </script>
 </body>
 </html>

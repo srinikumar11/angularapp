@@ -17,11 +17,13 @@ angular.module('project', ['CouchDB']).
     });
 
 function ListCtrl($scope, ProjectCouch) {
+    alert( ProjectCouch.get({q:'_all_docs', include_docs: 'true', limit: 10}));
     $scope.projects = ProjectCouch.get({q:'_all_docs', include_docs: 'true', limit: 10});
 }
 
 function CreateCtrl($scope, $location, ProjectCouch) {
     $scope.save = function() {
+        console.log($scope.project);
         ProjectCouch.save($scope.project, function(project) {
             $location.path('/edit/' + project.id);
         });
@@ -48,6 +50,7 @@ function EditCtrl($scope, $location, $routeParams, ProjectCouch) {
 
     $scope.save = function() {
         $scope.project.update(function() {
+            console.log($scope.project);
             $location.path('/');
         });
     };

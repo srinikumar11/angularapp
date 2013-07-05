@@ -30,7 +30,7 @@ factory('cornercouch', ['$http', function($http) {
     function CouchDB(dbName, serverUri, getMethod) {
 
         // CouchDoc accesses the DB level via this variable in the closure
-        var dbUri = encodeUri(serverUri+'/couchdb/', dbName);
+        var dbUri = encodeUri(serverUri, dbName);
 
         // Inner document constructor
         // Template object can be passed in and gets copied over
@@ -340,7 +340,7 @@ factory('cornercouch', ['$http', function($http) {
         var server = this;
         return $http ({
             method:     "GET",
-            url:        this.uri + "/couchdb/_session"
+            url:        this.uri + "/_session"
         })
         .success(function(data) {
             server.userCtx = data.userCtx;

@@ -71,7 +71,23 @@
         </form>
     </script>
 </div>
+<script>
+    (function () {
 
+        var app = angular.module('app');
+        app.controller('CouchCtrl', function ($scope,$http,$resource) {
+            var all_critters = 'http://localhost/couchdb/critters/_all_docs?callback=?';
+            $.getJSON(all_critters, function(json) {
+                $scope.$apply(function(){
+                    $scope.all_critters = json;
+                });
+            });
+            $scope.getAllCritters = function() {
+                return $scope.all_critters;
+            };
+        });
+    }());
+</script>
 </body>
 </html>
 
