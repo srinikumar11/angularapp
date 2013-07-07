@@ -1,0 +1,189 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title> - jsFiddle demo by asgoth</title>
+
+    <script type='text/javascript' src='/js/lib/dummy.js'></script>
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css">
+
+
+    <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+
+
+    <link rel="stylesheet" type="text/css" href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css">
+
+
+
+
+
+    <script type='text/javascript' src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+
+
+
+
+    <script type='text/javascript' src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.js"></script>
+
+
+    <style type='text/css'>
+
+    </style>
+
+</head>
+<body ng-app="myApp">
+<div ng-controller="Ctrl">
+    <h2>Stock prices for: {{symbol}}</h2>
+    <label for="symbol">Stock symbol:</label>
+    <input name="symbol" type="text" ng-model="symbol" ng-change="getData()">
+    <label for="start">Start date:</label>
+    <input name="start" type="text" ng-model="startDate" ng-change="getData()">
+    <label for="end">End date:</label>
+    <input name="end" type="text" ng-model="endDate" ng-change="getData()">
+    <label for="method">Lookup method</label>
+    <select ng-model="method" ng-options="o.value for o in options"></select>
+
+    <table class="table table-bordered table-hover">
+        <thead>
+        <th>Date</th>
+        <th>Open</th>
+        <th>Close</th>
+        </thead>
+        <tbody>
+        <tr ng-show='method.value === "watch"' ng-repeat="item in items.list">
+            <td>{{item.Date}}</td>
+            <td>{{item.Open}}</td>
+            <td>{{item.Close}}</td>
+        </tr>
+        <tr ng-hide='method.value === "watch"' ng-repeat="item in items">
+            <td>{{item.Date}}</td>
+            <td>{{item.Open}}</td>
+            <td>{{item.Close}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<script type='text/javascript'>//<![CDATA[ 
+
+var app = angular.module('myApp', []);
+
+app.factory('service', function($q, $http) {
+    var fixedEncodeURIComponent = function(str) {
+        return encodeURIComponent(str).replace(/[!'()]/g, escape).replace(/\*/g, "%2A").replace(/\"/g, "%22");
+    };
+    var format = '&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=JSON_CALLBACK';
+
+    return {
+
+        // return a promise to controller
+        getHistoricalDataWithQ: function(symbol, start, end) {
+            var deferred = $q.defer();
+            var query = 'select * from yahoo.finance.historicaldata where symbol = "' + symbol + '" and startDate = "' + start + '" and endDate = "' + end + '"';
+            var url = 'http://query.yahooapis.com/v1/public/yql?q=' + fixedEncodeURIComponent(query) + format;
+
+            console.log(url);
+
+            $http.jsonp(url).success(function(json) {
+                console.log(JSON.stringify(json));
+                var quotes = json.query.results.quote;
+                // filter + format quotes here if you want
+                deferred.resolve(quotes);
+            }).error(function(error) {
+                        console.log(JSON.stringify(error));
+                    });
+            return deferred.promise;
+        },
+        // add a callback from controller
+        getHistoricalDataWithCallback: function(callback, symbol, start, end) {
+            var query = 'select * from yahoo.finance.historicaldata where symbol = "' + symbol + '" and startDate = "' + start + '" and endDate = "' + end + '"';
+            var url = 'http://query.yahooapis.com/v1/public/yql?q=' + fixedEncodeURIComponent(query) + format;
+
+            console.log(url);
+
+            $http.jsonp(url).success(function(json) {
+                console.log(JSON.stringify(json));
+                var quotes = json.query.results.quote;
+                // filter + format quotes here if you want
+                callback(quotes);
+            }).error(function(error) {
+                        console.log(JSON.stringify(error));
+                    });
+        },
+        // let angular watch the scope change implicitly
+        getHistoricalDataWithWatch: function(symbol, start, end) {
+            var query = 'select * from yahoo.finance.historicaldata where symbol = "' + symbol + '" and startDate = "' + start + '" and endDate = "' + end + '"';
+            var url = 'http://query.yahooapis.com/v1/public/yql?q=' + fixedEncodeURIComponent(query) + format;
+
+            console.log(url);
+
+            var quotes = {};
+
+            $http.jsonp(url).success(function(json) {
+                console.log(JSON.stringify(json));
+                quotes.list = json.query.results.quote;
+            }).error(function(error) {
+                        console.log(JSON.stringify(error));
+                    });
+            return quotes;
+        }
+
+    };
+});
+
+function Ctrl($scope, service) {
+    $scope.symbol = "GOOG";
+    $scope.items = [];
+    $scope.startDate = '2012-12-05';
+    $scope.endDate = '2012-12-06';
+    $scope.options = [{
+        value: '$q'},
+        {
+            value: 'callback'},
+        {
+            value: 'watch'}];
+    $scope.method = $scope.options[0];
+
+    $scope.$watch(function combinedWatch() {
+        return {
+            symbol: $scope.symbol,
+            startDate: $scope.startDate,
+            endDate: $scope.endDate,
+            method: $scope.method
+        };
+    }, function(value) {
+        if (value.symbol && value.startDate && value.endDate && value.method) {
+            console.log('Start updating ' + JSON.stringify(value));
+            $scope.items = [];
+            if ($scope.method.value === '$q') {
+                var promise = service.getHistoricalDataWithQ($scope.symbol, $scope.startDate, $scope.endDate);
+
+                promise.then(function(data) {
+                    $scope.items = data;
+                });
+            }
+            if ($scope.method.value === 'callback') {
+                service.getHistoricalDataWithCallback(function(data) {
+                    $scope.items = data;
+                }, $scope.symbol, $scope.startDate, $scope.endDate);
+            }
+            if ($scope.method.value === 'watch') {
+                $scope.items = service.getHistoricalDataWithWatch($scope.symbol, $scope.startDate, $scope.endDate);
+            }
+        }
+    }, true);
+}
+//]]>  
+
+</script>
+
+
+</body>
+
+
+</html>
+
