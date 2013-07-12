@@ -94,11 +94,11 @@
 
     function ctrlGBook1($scope, $filter, cornercouch) {
 
-        $scope.server = cornercouch('http://localhost:5984');
+        $scope.server = cornercouch('http://127.0.0.1:5984');
         $scope.server.session();
         $scope.gbookdb = $scope.server.getDB('gbook1');
         $scope.newentry = $scope.gbookdb.newDoc();
-        $scope.gbookdb.query("app", "utc_only", { include_docs: true, descending: true, limit: 8 ,callback:'JSON_CALLBACK'});
+        $scope.gbookdb.query("app", "utc_only", { include_docs: true, descending: true, limit: 8 });
 
         $scope.submitLogin = function() {
             $scope.server.login($scope.loginUser, $scope.loginPass)
